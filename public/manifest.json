@@ -1,0 +1,26 @@
+
+{
+  "name": "MotivMove - Office Exercise Coach",
+  "short_name": "MotivMove",
+  "description": "A PWA to motivate office workers with simple exercises and stretches",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10B981",
+  "orientation": "portrait",
+  "categories": ["health", "fitness", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}
