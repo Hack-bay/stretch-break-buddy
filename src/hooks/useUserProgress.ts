@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { UserProgress, ExerciseSession, Badge } from '../types/exercise';
+import { Voucher, ClaimedVoucher } from '../types/voucher';
 import { storageManager } from '../utils/storage';
 import { recommendationEngine } from '../utils/recommendations';
 
@@ -13,7 +13,8 @@ export const useUserProgress = () => {
     exercisePreferences: {},
     badges: [],
     streak: 0,
-    lastExerciseDate: ''
+    lastExerciseDate: '',
+    claimedVouchers: []
   });
   
   const [loading, setLoading] = useState(true);
@@ -148,9 +149,45 @@ export const useUserProgress = () => {
     progress.badges = badges;
   };
 
+  const claimVoucher = async (voucher: Voucher) => {
+    if (userProgress.totalPoints < voucher.pointCost) {
+      throw new Error('Nicht genug Punkte');
+    }
+
+    const claimedVoucher: ClaimedVoucher = {
+      id: `claimed-${voucher.id}-${Date.now()}`,
+      voucherId: voucher.id,
+      claimedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + voucher.validityDays * 24 * 60 * 60 * 1000).toISOString(),
+      code: generateVoucherCode(),
+      voucher
+    };
+
+    const newProgress = {
+      ...userProgress,
+      totalPoints: userProgress.totalPoints - voucher.pointCost,
+      claimedVouchers: [...(userProgress.claimedVouchers || []), claimedVoucher]
+    };
+
+    setUserProgress(newProgress);
+    await storageManager.saveUserProgress(newProgress);
+
+    return claimedVoucher;
+  };
+
+  const generateVoucherCode = (): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   return {
     userProgress,
     updateProgress,
+    claimVoucher,
     loading,
     refreshProgress: loadUserProgress
   };

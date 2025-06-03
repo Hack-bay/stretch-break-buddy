@@ -1,4 +1,6 @@
 
+import { ClaimedVoucher } from './voucher';
+
 export interface Exercise {
   id: string;
   name: string;
@@ -21,6 +23,7 @@ export interface UserProgress {
   badges: Badge[];
   streak: number;
   lastExerciseDate: string;
+  claimedVouchers: ClaimedVoucher[];
 }
 
 export interface Badge {

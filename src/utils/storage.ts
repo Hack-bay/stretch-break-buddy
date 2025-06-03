@@ -55,7 +55,8 @@ class StorageManager {
             exercisePreferences: {},
             badges: [],
             streak: 0,
-            lastExerciseDate: ''
+            lastExerciseDate: '',
+            claimedVouchers: []
           };
           resolve(defaultProgress);
         }

@@ -1,19 +1,20 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CardStack from '../components/CardStack';
 import ProgressDashboard from '../components/ProgressDashboard';
 import RecentActivity from '../components/RecentActivity';
+import RewardsScreen from '../components/RewardsScreen';
 import { useUserProgress } from '../hooks/useUserProgress';
 import { Exercise } from '../types/exercise';
+import { Voucher } from '../types/voucher';
 import { storageManager } from '../utils/storage';
 import { notificationManager } from '../utils/notifications';
-import { Activity, Home, Settings, Bell, BellOff } from 'lucide-react';
+import { Activity, Home, Settings, Bell, BellOff, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
-  const { userProgress, updateProgress, loading } = useUserProgress();
+  const { userProgress, updateProgress, claimVoucher, loading } = useUserProgress();
   const [activeTab, setActiveTab] = useState('exercise');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const { toast } = useToast();
@@ -58,6 +59,22 @@ const Index = () => {
       if (notificationsEnabled) {
         notificationManager.scheduleReminder(30);
       }
+    }
+  };
+
+  const handleClaimVoucher = async (voucher: Voucher) => {
+    try {
+      const claimedVoucher = await claimVoucher(voucher);
+      toast({
+        title: "Gutschein eingelöst! 🎉",
+        description: `Du hast "${voucher.title}" erfolgreich eingelöst. Code: ${claimedVoucher.code}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Fehler",
+        description: error instanceof Error ? error.message : "Gutschein konnte nicht eingelöst werden",
+        variant: "destructive"
+      });
     }
   };
 
@@ -137,7 +154,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="exercise" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
               Exercise
@@ -145,6 +162,10 @@ const Index = () => {
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <Home className="w-4 h-4" />
               Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="rewards" className="flex items-center gap-2">
+              <Gift className="w-4 h-4" />
+              Rewards
             </TabsTrigger>
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -170,6 +191,13 @@ const Index = () => {
 
           <TabsContent value="dashboard" className="space-y-6">
             <ProgressDashboard userProgress={userProgress} />
+          </TabsContent>
+
+          <TabsContent value="rewards" className="space-y-6">
+            <RewardsScreen 
+              userProgress={userProgress}
+              onClaimVoucher={handleClaimVoucher}
+            />
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">
